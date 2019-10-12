@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+import torch
 import matplotlib.pyplot as plt
 from loguru import logger
 from tqdm import tqdm
@@ -26,17 +27,18 @@ def main():
     args = get_args()
     mat_images = MatImages(args.mat_path)
     patch_size = (args.patch_width, args.patch_hight)
-    snl = SparseNetLearning(
-        mat_images,
-        patch_size,
-        args.basis_func_num,
-        args.e_step_iter_num,
-        args.lr,
-        args.iter_num,
-        args.gpu
-        )
-    logger.info('Train start')
-    snl.train()
+    with torch.no_grad():
+        snl = SparseNetLearning(
+            mat_images,
+            patch_size,
+            args.basis_func_num,
+            args.e_step_iter_num,
+            args.lr,
+            args.iter_num,
+            args.gpu
+            )
+        logger.info('Train start')
+        snl.train()
     logger.info('Image save start')
     basis_func_list = snl.get_basis_func_list()
     for i, func in tqdm(
