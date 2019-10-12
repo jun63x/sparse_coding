@@ -32,14 +32,9 @@ class SparseNetLearning:
 
     def sample_patch(self):
         sampled_patch = self.images.sample_patch(self.patch_size).flatten()
-        # return torch.Tensor(
-        #     scipy.stats.zscore(sampled_patch),
-        #     device=self.device
-        #     )
         return torch.Tensor(
             scipy.stats.zscore(sampled_patch),
             ).to(self.device)
-
 
     def exe_e_step(self, y):
         x = torch.zeros(self.basis_func_num, device=self.device)
