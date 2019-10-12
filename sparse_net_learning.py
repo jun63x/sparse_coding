@@ -11,26 +11,38 @@ class SparseNetLearning:
         basis_func_num,
         e_step_iter_num,
         lr,
-        iter_num
+        iter_num,
+        gpu
             ):
         self.images = images
         self.patch_size = patch_size
         self.basis_func_num = basis_func_num
-        self.vec_lambda = torch.ones(self.basis_func_num)
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() and gpu else "cpu"
+            )
+        self.vec_lambda = torch.ones(self.basis_func_num, device=self.device)
         self.e_step_iter_num = e_step_iter_num
         self.lr = lr
         self.iter_num = iter_num
         self.mat_phi = torch.randn(
             self.patch_size[0]*self.patch_size[1],
             self.basis_func_num,
+            device=self.device
             )
 
     def sample_patch(self):
         sampled_patch = self.images.sample_patch(self.patch_size).flatten()
-        return torch.Tensor(scipy.stats.zscore(sampled_patch))
+        # return torch.Tensor(
+        #     scipy.stats.zscore(sampled_patch),
+        #     device=self.device
+        #     )
+        return torch.Tensor(
+            scipy.stats.zscore(sampled_patch),
+            ).to(self.device)
+
 
     def exe_e_step(self, y):
-        x = torch.zeros(self.basis_func_num)
+        x = torch.zeros(self.basis_func_num, device=self.device)
         for _ in range(self.e_step_iter_num):
             deriv1 = torch.matmul(
                 torch.transpose(self.mat_phi, 0, 1),
@@ -63,5 +75,5 @@ class SparseNetLearning:
         return [
             vec.reshape(
                 self.patch_size
-                ).numpy() for vec in torch.transpose(self.mat_phi, 0, 1)
+                ).cpu().numpy() for vec in torch.transpose(self.mat_phi, 0, 1)
             ]

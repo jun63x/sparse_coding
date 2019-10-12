@@ -10,6 +10,7 @@ from sparse_net_learning import SparseNetLearning
 
 def get_args():
     parser = ArgumentParser()
+    parser.add_argument('--gpu', action='store_true')
     parser.add_argument("--mat_path", type=str)
     parser.add_argument("--img_dir", type=str)
     parser.add_argument("--patch_width", default=12, type=int)
@@ -31,7 +32,8 @@ def main():
         args.basis_func_num,
         args.e_step_iter_num,
         args.lr,
-        args.iter_num
+        args.iter_num,
+        args.gpu
         )
     logger.info('Train start')
     snl.train()
