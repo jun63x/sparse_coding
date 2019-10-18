@@ -14,6 +14,7 @@ class SparseNetLearning:
         iter_num,
         gpu
             ):
+        torch.set_default_tensor_type(torch.DoubleTensor)
         self.images = images
         self.patch_size = patch_size
         self.basis_func_num = basis_func_num
@@ -32,9 +33,11 @@ class SparseNetLearning:
 
     def sample_patch(self):
         sampled_patch = self.images.sample_patch(self.patch_size).flatten()
-        return torch.Tensor(
-            scipy.stats.zscore(sampled_patch),
-            ).to(self.device)
+        # return torch.Tensor(
+        #     scipy.stats.zscore(sampled_patch),
+        #     ).to(self.device)
+        sampled_patch = torch.Tensor(sampled_patch).to(self.device)
+        return (sampled_patch - sampled_patch.mean()) / sampled_patch.std()
 
     def exe_e_step(self, y):
         x = torch.zeros(self.basis_func_num, device=self.device)
