@@ -31,15 +31,12 @@ class SparseNetLearning:
             device=self.device
             )
 
-    def sample_patch(self):
+    def _sample_patch(self):
         sampled_patch = self.images.sample_patch(self.patch_size).flatten()
-        # return torch.Tensor(
-        #     scipy.stats.zscore(sampled_patch),
-        #     ).to(self.device)
         sampled_patch = torch.Tensor(sampled_patch).to(self.device)
         return (sampled_patch - sampled_patch.mean()) / sampled_patch.std()
 
-    def exe_e_step(self, y):
+    def _exe_e_step(self, y):
         x = torch.zeros(self.basis_func_num, device=self.device)
         for _ in range(self.e_step_iter_num):
             deriv1 = torch.matmul(
@@ -55,19 +52,19 @@ class SparseNetLearning:
             self.vec_lambda = 1 / torch.diag(mat_w + torch.ger(x, x))
         return mat_w, x
 
-    def exe_m_step(self, y, mat_w, x):
+    def _exe_m_step(self, y, mat_w, x):
         deriv = torch.ger(y, x) - \
             torch.matmul(self.mat_phi, mat_w+torch.ger(x, x))
         self.mat_phi = self.mat_phi + self.lr*deriv
 
-    def norm_bases(self):
+    def _norm_bases(self):
         self.mat_phi = self.mat_phi / self.mat_phi.norm(p=2)
 
     def train(self):
         for i in trange(self.iter_num, ncols=50):
-            y = self.sample_patch()
-            self.exe_m_step(y, *self.exe_e_step(y))
-            self.norm_bases()
+            y = self._sample_patch()
+            self._exe_m_step(y, *self._exe_e_step(y))
+            self._norm_bases()
 
     def get_basis_func_list(self):
         return [
