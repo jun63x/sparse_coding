@@ -1,5 +1,5 @@
+import logging
 import torch
-from loguru import logger
 
 from mat_images import MatImages
 from sparse_net_learning import SparseNetLearning
@@ -8,6 +8,7 @@ from args import get_args
 
 
 def main():
+    logger = logging.getLogger(__name__)
     args = get_args()
     mat_images = MatImages(args.mat_path)
     patch_size = (args.patch_width, args.patch_hight)
